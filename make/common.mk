@@ -56,7 +56,7 @@ SIZE    = $(TOOLCHAIN_PATH)$(TOOLCHAIN_SEPARATOR)$(TOOLCHAIN_PREFIX)size
 
 # Flags - Overall Options
 CPPFLAGS += -specs=nosys.specs
-
+CPPFLAGS += -std=gnu++14
 # Flags - C Language Options
 CFLAGS += -ffreestanding
 
@@ -79,7 +79,8 @@ CPPFLAGS += -fdata-sections
 
 # Flags - Preprocessor options
 CPPFLAGS += -D $(MAPPED_DEVICE)
-
+CPPFLAGS += -D STM32F4xx
+CPPFLAGS += -D DEBUG
 # Flags - Assembler Options
 ifneq (,$(or USE_ST_CMSIS, USE_ST_HAL))
     CPPFLAGS += -Wa,--defsym,CALL_ARM_SYSTEM_INIT=1
@@ -112,24 +113,32 @@ OBJ_FILE_PATH = $(OBJ_FOLDER)/$(OBJ_FILE_NAME)
 # Input files
 SRC ?=
 SRC += $(SRC_FOLDER)/*.c
-
+SRC += $(SRC_FOLDER)/*.cpp
 # Startup file
 DEVICE_STARTUP = $(BASE_STARTUP)/$(SERIES_FOLDER)/$(MAPPED_DEVICE).s
 
 # Include the CMSIS files
-CPPFLAGS += -I.Drivers/CMSIS/Include
-CPPFLAGS += -I.Drivers/CMSIS/Device/ST/STM32F4xx/Include
+CMSISLINK = inc/Drivers/CMSIS
+CFLAGS += -I $(CMSISLINK)/Include
+CFLAGS += -I $(CMSISLINK)/Device/ST/STM32F4xx/Include
 
+CPPFLAGS += -I $(CMSISLINK)/Include
+CPPFLAGS += -I $(CMSISLINK)/Device/ST/STM32F4xx/Include
 # Include the HAL files
+HALLINK = inc/Drivers/STM32F4xx_HAL_Driver
+CPPFLAGS += -D USE_HAL_DRIVER
 
-CPPFLAGS += -I.Drivers/STM32F4xx_HAL_Driver/Inc
-CPPFLAGS += -I.Drivers/STM32F4xx_HAL_Driver/Inc/Legacy
+CFLAGS += -I $(HALLINK)/Inc
+CFLAGS += -I $(HALLINK)/Inc/Legacy
+
+CPPFLAGS += -I $(HALLINK)/Inc
+CPPFLAGS += -I $(HALLINK)/Inc/Legacy
 
 # A simply expanded variable is used here to perform the find command only once.
-HAL_SRC := $(shell find .Drivers/STM32F4xx_HAL_Driver/Src/*.c ! -name '*_template.c')
+HAL_SRC += $(shell find $(HALLINK)/Src/*.c ! -name '*_template.c')
 SRC += $(HAL_SRC)
 
-# Make all
+# Make allS
 all:$(BIN_FILE_PATH)
 
 $(BIN_FILE_PATH): $(ELF_FILE_PATH)
