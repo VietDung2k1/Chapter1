@@ -31,7 +31,7 @@ void setup(void)
 
 void loop(void)
 {
-  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 
   str_msg.data = hello;
   chatter.publish(&str_msg);
